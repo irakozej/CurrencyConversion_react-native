@@ -3,6 +3,9 @@ please note that the conversion will be done with the help of fastforex API.
 
 
 To run this app do
+
 npx create-expo-app CurrencyConversion
+
 cd CurrencyConversion
+
 npx expo start
