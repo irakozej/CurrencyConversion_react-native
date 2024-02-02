@@ -4,3 +4,4 @@ module.exports = function(api) {
     presets: ['babel-preset-expo'],
   };
 };
+// it's little but works yeah.

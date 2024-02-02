@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState("");
@@ -7,14 +14,19 @@ const CurrencyConverter = () => {
   const [toCurrency, setToCurrency] = useState("EUR");
   const [conversionRate, setConversionRate] = useState(null);
   const [convertedAmount, setConvertedAmount] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchConversionRate();
   }, [fromCurrency, toCurrency]);
 
   const fetchConversionRate = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      const apiKey = ""; // Replace with your API key
+      const apiKey = "YOUR_OPENEXCHANGERATES_API_KEY"; // Replace with your API key
       const response = await fetch(
         `https://open.er-api.com/v6/latest/${fromCurrency}`,
         {
@@ -27,8 +39,11 @@ const CurrencyConverter = () => {
       const data = await response.json();
       const rate = data.rates[toCurrency];
       setConversionRate(rate);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching conversion rate:", error);
+      setError("Error fetching conversion rate. Please try again.");
+      setLoading(false);
     }
   };
 
@@ -38,8 +53,13 @@ const CurrencyConverter = () => {
       return;
     }
 
-    const convertedValue = parseFloat(amount) * conversionRate;
-    setConvertedAmount(convertedValue.toFixed(2));
+    if (conversionRate === null) {
+      alert("Please wait while fetching conversion rate.");
+      return;
+    }
+
+    const convertedValue = (parseFloat(amount) * conversionRate).toFixed(2);
+    setConvertedAmount(convertedValue);
   };
 
   return (
@@ -65,6 +85,11 @@ const CurrencyConverter = () => {
         onChangeText={(text) => setToCurrency(text.toUpperCase())}
       />
       <Button title="Convert" onPress={convertCurrency} />
+
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+
+      {error && <Text style={styles.error}>{error}</Text>}
+
       {conversionRate !== null && (
         <Text style={styles.result}>
           {amount} {fromCurrency} is equal to {convertedAmount} {toCurrency}
@@ -84,6 +109,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 20,
+    fontWeight: "bold",
   },
   input: {
     height: 40,
@@ -96,6 +122,10 @@ const styles = StyleSheet.create({
   result: {
     marginTop: 20,
     fontSize: 18,
+  },
+  error: {
+    color: "red",
+    marginTop: 10,
   },
 });
 
